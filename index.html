@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,30 +8,76 @@
     <!-- Google Fonts: Dancing Script for captions, Inter for UI -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Inter:wght@300;400;500&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+
+    <!-- Welcome Screen -->
+    <div id="welcome-screen" class="welcome-screen">
+        <div class="welcome-content">
+            <h1>❤️ Bem vindo, amor ❤️</h1>
+            <p>Vamos relembrar alguns momentos especiais...</p>
+            <button id="btn-enter" class="enter-btn">Entrar no nosso mundo</button>
+        </div>
+    </div>
+
+    <!-- Heart Rain Container -->
+    <div id="heart-rain-container"></div>
+
+    <!-- Flip Card Modal -->
+    <div id="letter-modal" class="letter-modal hidden">
+        <div class="letter-overlay" id="letter-overlay"></div>
+        <div class="flip-card">
+            <div class="flip-card-inner">
+                <div class="flip-card-front">
+                    <i class="fas fa-envelope-open-text"></i>
+                    <p>Tem uma cartinha pra você...</p>
+                    <small>(Clique para ler)</small>
+                </div>
+                <div class="flip-card-back">
+                    <div class="card-content">
+                        <h3>Para meu Amor</h3>
+                        <p id="letter-text">Sua mensagem aparecerá aqui...</p>
+                        <i class="fas fa-heart signature-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Music Player (Hidden) -->
+    <audio id="bg-music" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mp3">
+        Seu navegador não suporta áudio.
+    </audio>
 
     <div class="gallery-container">
         <!-- Main Viewer Area -->
         <main class="main-viewer">
             <!-- Navigation -->
             <button class="nav-btn prev" aria-label="Foto anterior"><i class="fas fa-chevron-left"></i></button>
-            
+
             <div class="photo-wrapper">
                 <div class="photo-frame">
                     <img id="current-photo" src="" alt="Nossa memória" class="active-photo">
                     <div class="photo-overlay"></div>
+                    <!-- Letter Trigger Button -->
+                    <button id="btn-open-letter" class="letter-trigger" title="Ler carta"><i
+                            class="fas fa-envelope"></i></button>
                 </div>
-                
+
                 <!-- Caption Container -->
                 <div class="caption-container">
                     <p id="photo-caption" class="caption-text"></p>
                     <div class="photo-meta">
                         <span id="photo-date"><i class="far fa-calendar-alt"></i> <span class="date-text"></span></span>
-                        <span id="photo-location"><i class="fas fa-map-marker-alt"></i> <span class="location-text"></span></span>
+                        <span id="photo-location"><i class="fas fa-map-marker-alt"></i> <span
+                                class="location-text"></span></span>
                     </div>
                 </div>
             </div>
@@ -42,17 +89,21 @@
         <footer class="gallery-footer">
             <div class="controls-bar">
                 <div class="left-controls">
-                    <button id="btn-favorite" class="control-btn" aria-label="Favoritar"><i class="far fa-heart"></i></button>
-                    <button id="btn-download" class="control-btn" aria-label="Baixar foto"><i class="fas fa-download"></i></button>
+                    <button id="btn-favorite" class="control-btn" aria-label="Favoritar"><i
+                            class="far fa-heart"></i></button>
+                    <button id="btn-download" class="control-btn" aria-label="Baixar foto"><i
+                            class="fas fa-download"></i></button>
                 </div>
-                
+
                 <div class="counter">
                     <span id="current-index">1</span> / <span id="total-photos">0</span>
                 </div>
 
                 <div class="right-controls">
-                    <button id="btn-play" class="control-btn" aria-label="Slideshow"><i class="fas fa-play"></i></button>
-                    <button id="btn-fullscreen" class="control-btn" aria-label="Tela cheia"><i class="fas fa-expand"></i></button>
+                    <button id="btn-play" class="control-btn" aria-label="Slideshow"><i
+                            class="fas fa-play"></i></button>
+                    <button id="btn-fullscreen" class="control-btn" aria-label="Tela cheia"><i
+                            class="fas fa-expand"></i></button>
                 </div>
             </div>
 
@@ -67,4 +118,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>
