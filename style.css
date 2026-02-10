@@ -156,14 +156,14 @@ body {
 .nav-btn {
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    color: var(--text-dark);
+    color: var(--text-main);
     width: 50px;
     height: 50px;
     border-radius: 50%;
     cursor: pointer;
     font-size: 1.2rem;
     transition: all 0.3s ease;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(8px);
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
@@ -171,9 +171,9 @@ body {
 }
 
 .nav-btn:hover {
-    background: white;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    color: var(--primary-color);
+    background: var(--primary-color);
+    box-shadow: 0 0 20px var(--primary-color);
+    color: white;
 }
 
 .nav-btn.prev {
@@ -197,10 +197,11 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
-    background: white;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
     border-radius: 50px;
     height: 60px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(10px);
     margin: 0 auto;
     width: 100%;
     max-width: 600px;
@@ -211,9 +212,9 @@ body {
     border: none;
     cursor: pointer;
     font-size: 1.2rem;
-    color: #8899a6;
+    color: var(--text-muted);
     padding: 10px;
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .control-btn:hover,
@@ -296,7 +297,7 @@ body {
 .thumb.active {
     opacity: 1;
     border-color: var(--primary-color);
-    box-shadow: 0 5px 15px rgba(225, 173, 172, 0.4);
+    box-shadow: 0 0 15px var(--primary-color);
     transform: scale(1.1);
 }
 
