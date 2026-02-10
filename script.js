@@ -1,6 +1,5 @@
 /**
  * CONFIGURAÇÃO DO ÁLBUM
- * =====================
  */
 const albumData = [
     {
@@ -26,13 +25,13 @@ const albumData = [
     },
 ];
 
-// --- ESTADO DA APLICAÇÃO ---
+// --- VARIÁVEIS GLOBAIS ---
 let currentIndex = 0;
 let isPlaying = false;
 let slideInterval;
 let favorites = JSON.parse(localStorage.getItem('albumFavorites')) || [];
 
-// --- ELEMENTOS DO DOM ---
+// --- ELEMENTOS ---
 const currentPhoto = document.getElementById('current-photo');
 const photoCaption = document.getElementById('photo-caption');
 const dateText = document.querySelector('.date-text');
@@ -41,17 +40,20 @@ const thumbnailsList = document.getElementById('thumbnails-list');
 const currentIndexSpan = document.getElementById('current-index');
 const totalPhotosSpan = document.getElementById('total-photos');
 
-// Elementos Novos
+// Modais e Overlays
 const welcomeScreen = document.getElementById('welcome-screen');
 const btnEnter = document.getElementById('btn-enter');
-const bgMusic = document.getElementById('bg-music');
 const letterModal = document.getElementById('letter-modal');
 const letterOverlay = document.getElementById('letter-overlay');
 const btnOpenLetter = document.getElementById('btn-open-letter');
 const letterText = document.getElementById('letter-text');
 const flipCard = document.querySelector('.flip-card');
 
-// Botões
+// Player de Música
+const bgMusic = document.getElementById('bg-music');
+const btnMusic = document.getElementById('btn-music');
+
+// Controles
 const btnPrev = document.querySelector('.nav-btn.prev');
 const btnNext = document.querySelector('.nav-btn.next');
 const btnPlay = document.getElementById('btn-play');
@@ -66,43 +68,47 @@ function init() {
     loadPhoto(currentIndex);
     checkFavoriteStatus();
 
-    // Welcome & Music
-    btnEnter.addEventListener('click', () => {
-        welcomeScreen.classList.add('hidden');
-        bgMusic.volume = 0.3; // Volume suave
-        bgMusic.play().catch(e => console.log("Erro ao tocar música:", e));
-    });
+    // Listeners
+    setupEventListeners();
+    setupSwipe();
+}
 
-    // Flip Card / Carta
-    btnOpenLetter.addEventListener('click', openLetter);
-    letterOverlay.addEventListener('click', closeLetter);
-    flipCard.addEventListener('click', () => {
-        flipCard.classList.toggle('flipped');
-    });
+function setupEventListeners() {
+    // Welcome Screen
+    btnEnter.addEventListener('click', enterAlbum);
 
-    // Event Listeners
+    // Navegação
     btnPrev.addEventListener('click', () => changePhoto(-1));
     btnNext.addEventListener('click', () => changePhoto(1));
+
+    // Controles
     btnPlay.addEventListener('click', togglePlay);
     btnFavorite.addEventListener('click', handleFavoriteClick);
     btnFullscreen.addEventListener('click', toggleFullscreen);
     btnDownload.addEventListener('click', downloadPhoto);
+    if (btnMusic) btnMusic.addEventListener('click', toggleMusic);
+
+    // Carta
+    btnOpenLetter.addEventListener('click', openLetter);
+    letterOverlay.addEventListener('click', closeLetter);
+    flipCard.addEventListener('click', () => flipCard.classList.toggle('flipped'));
 
     // Teclado
     document.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft') changePhoto(-1);
         if (e.key === 'ArrowRight') changePhoto(1);
         if (e.key === 'Escape') closeLetter();
+        if (e.key === ' ') togglePlay();
     });
-
-    // Mobile Swipe
-    setupSwipe();
 }
 
-// --- CORE FUNCTIONS ---
+function enterAlbum() {
+    welcomeScreen.classList.add('hidden');
+    startMusic();
+}
 
+// --- LÓGICA DE FOTOS ---
 function loadPhoto(index) {
-    // Efeito de fade-out
     currentPhoto.classList.add('fade-out');
 
     setTimeout(() => {
@@ -112,16 +118,14 @@ function loadPhoto(index) {
         photoCaption.style.opacity = 0;
         photoCaption.textContent = photo.legenda;
 
-        dateText.textContent = photo.data || '';
-        locationText.textContent = photo.local || '';
+        if (dateText) dateText.textContent = photo.data || '';
+        if (locationText) locationText.textContent = photo.local || '';
 
-        // Atualizar texto da carta
-        letterText.textContent = photo.mensagem || "Escreva uma mensagem especial para esta foto aqui...";
+        if (letterText) letterText.textContent = photo.mensagem || "Escreva uma mensagem especial...";
 
-        // Atualizar contador
         currentIndexSpan.textContent = index + 1;
 
-        // Atualizar thumbnails
+        // Atualiza Thumbnails
         document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
         const activeThumb = document.querySelector(`.thumb[data-index="${index}"]`);
         if (activeThumb) {
@@ -131,7 +135,6 @@ function loadPhoto(index) {
 
         checkFavoriteStatus();
 
-        // Fade-in
         currentPhoto.onload = () => {
             currentPhoto.classList.remove('fade-out');
             photoCaption.style.opacity = 1;
@@ -142,11 +145,10 @@ function loadPhoto(index) {
 
 function changePhoto(direction) {
     currentIndex = (currentIndex + direction + albumData.length) % albumData.length;
-    flipCard.classList.remove('flipped'); // Resetar carta
+    flipCard.classList.remove('flipped');
     loadPhoto(currentIndex);
 }
 
-// ... (renderThumbnails mantido igual, mas omitido aqui para brevidade se não mudou) ... 
 function renderThumbnails() {
     thumbnailsList.innerHTML = '';
     albumData.forEach((photo, index) => {
@@ -165,23 +167,45 @@ function renderThumbnails() {
     });
 }
 
-
-// --- LÓGICA DA CARTA ---
-function openLetter() {
-    letterModal.classList.remove('hidden');
-    // Pequeno delay para animação de entrada se houver
+// --- MÚSICA ---
+function startMusic() {
+    bgMusic.volume = 0.4;
+    bgMusic.play().then(() => {
+        btnMusic.classList.add('active');
+    }).catch(e => {
+        console.warn("Autoplay bloqueado:", e);
+    });
 }
 
-function closeLetter() {
-    letterModal.classList.add('hidden');
-    flipCard.classList.remove('flipped');
+function toggleMusic() {
+    if (bgMusic.paused) {
+        bgMusic.play();
+        btnMusic.classList.add('active');
+    } else {
+        bgMusic.pause();
+        btnMusic.classList.remove('active');
+    }
+}
+
+// --- SLIDESHOW ---
+function togglePlay() {
+    isPlaying = !isPlaying;
+    const icon = btnPlay.querySelector('i');
+
+    if (isPlaying) {
+        icon.classList.remove('fa-play');
+        icon.classList.add('fa-pause');
+        slideInterval = setInterval(() => changePhoto(1), 3000);
+    } else {
+        icon.classList.remove('fa-pause');
+        icon.classList.add('fa-play');
+        clearInterval(slideInterval);
+    }
 }
 
 // --- CHUVA DE CORAÇÕES ---
 function handleFavoriteClick() {
     toggleFavorite();
-
-    // Se acabou de favoritar (agora está active), iniciar chuva
     if (btnFavorite.classList.contains('active')) {
         createHeartRain();
     }
@@ -189,7 +213,7 @@ function handleFavoriteClick() {
 
 function createHeartRain() {
     const container = document.getElementById('heart-rain-container');
-    const duration = 10000; // 10 segundos
+    const duration = 10000;
     const endTime = Date.now() + duration;
 
     const interval = setInterval(() => {
@@ -200,19 +224,20 @@ function createHeartRain() {
 
         const heart = document.createElement('div');
         heart.classList.add('falling-heart');
-        heart.innerHTML = '❤️';
+        const hearts = ['❤️', '💖', '💕', '💘', '💝', '✨'];
+        heart.innerHTML = hearts[Math.floor(Math.random() * hearts.length)];
+
         heart.style.left = Math.random() * 100 + 'vw';
-        heart.style.animationDuration = (Math.random() * 2 + 3) + 's'; // 3 a 5 segundos de queda
-        heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+        const size = Math.random() * 20 + 20;
+        heart.style.fontSize = size + 'px';
+
+        const animDuration = Math.random() * 3 + 2;
+        heart.style.animationDuration = animDuration + 's';
 
         container.appendChild(heart);
+        setTimeout(() => heart.remove(), animDuration * 1000);
 
-        // Remover elemento após animação
-        setTimeout(() => {
-            heart.remove();
-        }, 5000);
-
-    }, 300); // Criar um coração a cada 300ms
+    }, 200);
 }
 
 function toggleFavorite() {
@@ -226,22 +251,21 @@ function toggleFavorite() {
         favorites.splice(indexInFavs, 1);
         btnFavorite.classList.remove('active');
     }
-
     localStorage.setItem('albumFavorites', JSON.stringify(favorites));
 }
-
 
 function checkFavoriteStatus() {
     const photoUrl = albumData[currentIndex].src;
     if (favorites.includes(photoUrl)) {
         btnFavorite.classList.add('active');
-        btnFavorite.querySelector('i').className = 'fas fa-heart'; // Coração preenchido
+        btnFavorite.querySelector('i').className = 'fas fa-heart';
     } else {
         btnFavorite.classList.remove('active');
-        btnFavorite.querySelector('i').className = 'far fa-heart'; // Coração vazio
+        btnFavorite.querySelector('i').className = 'far fa-heart';
     }
 }
 
+// --- UI HELPERS ---
 function toggleFullscreen() {
     if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen();
@@ -258,35 +282,32 @@ function downloadPhoto() {
     const link = document.createElement('a');
     link.href = albumData[currentIndex].src;
     link.download = `nossa-memoria-${currentIndex + 1}`;
-    link.target = '_blank'; // Para suporte melhor a links externos
+    link.target = '_blank';
     link.click();
 }
 
-// --- TOUCH SWIPE (MOBILE) ---
+function openLetter() {
+    letterModal.classList.remove('hidden');
+}
+
+function closeLetter() {
+    letterModal.classList.add('hidden');
+    setTimeout(() => flipCard.classList.remove('flipped'), 300);
+}
+
+// --- MOBILE SWIPE ---
 function setupSwipe() {
     let touchStartX = 0;
     let touchEndX = 0;
-
     const viewer = document.querySelector('.main-viewer');
 
-    viewer.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-    });
-
+    viewer.addEventListener('touchstart', (e) => touchStartX = e.changedTouches[0].screenX);
     viewer.addEventListener('touchend', (e) => {
         touchEndX = e.changedTouches[0].screenX;
-        handleSwipeGesture();
+        if (touchEndX < touchStartX - 50) changePhoto(1);
+        if (touchEndX > touchStartX + 50) changePhoto(-1);
     });
-
-    function handleSwipeGesture() {
-        if (touchEndX < touchStartX - 50) {
-            changePhoto(1); // Swipe Left -> Next
-        }
-        if (touchEndX > touchStartX + 50) {
-            changePhoto(-1); // Swipe Right -> Prev
-        }
-    }
 }
 
-// Iniciar
+// Start
 init();
