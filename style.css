@@ -1,0 +1,348 @@
+/* CSS Variables & Reset */
+:root {
+    --primary-color: #ff6b81;
+    /* Soft Ping/Red */
+    --accent-color: #ffd700;
+    /* Gold */
+    --bg-dark-main: #0f0c29;
+    /* Deep Knight Blue */
+    --bg-dark-mid: #302b63;
+    --bg-dark-end: #24243e;
+    --text-main: #f0f0f0;
+    --text-muted: #a0a0a0;
+    --overlay-bg: rgba(0, 0, 0, 0.6);
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --shadow-glow: 0 0 20px rgba(255, 107, 129, 0.2);
+    --transition-speed: 0.5s;
+
+    --font-ui: 'Inter', sans-serif;
+    --font-script: 'Dancing Script', cursive;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: var(--font-ui);
+    background: linear-gradient(135deg, var(--bg-dark-main), var(--bg-dark-mid), var(--bg-dark-end));
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    color: var(--text-main);
+}
+
+@keyframes gradientBG {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Gallery Container */
+.gallery-container {
+    width: 100%;
+    height: 100%;
+    max-width: 1400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+/* Main Viewer (Photo Area) */
+.main-viewer {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 10px 40px;
+    /* Space for arrows */
+}
+
+/* Photo Wrapper & Frame */
+.photo-wrapper {
+    position: relative;
+    max-width: 90%;
+    max-height: 70vh;
+    border-radius: 20px;
+    box-shadow: var(--shadow-glow);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    border: 1px solid var(--glass-border);
+}
+
+.photo-wrapper:hover {
+    transform: scale(1.01);
+}
+
+.photo-frame {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+}
+
+#current-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* Ensure full photo is visible without cropping */
+    max-height: 70vh;
+    border-radius: 20px;
+    transition: opacity var(--transition-speed) ease-in-out;
+}
+
+/* Fade Effect Class */
+.fade-out {
+    opacity: 0 !important;
+}
+
+/* Caption Styles */
+.caption-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 30px;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    color: var(--text-light);
+    text-align: center;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    transform: translateY(0);
+    transition: transform 0.3s ease;
+}
+
+.caption-text {
+    font-family: var(--font-script);
+    font-size: 2rem;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    line-height: 1.3;
+}
+
+.photo-meta {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    font-weight: 300;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.photo-meta i {
+    color: var(--accent-color);
+    margin-right: 5px;
+}
+
+/* Navigation Buttons */
+.nav-btn {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-dark);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+
+.nav-btn:hover {
+    background: white;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    color: var(--primary-color);
+}
+
+.nav-btn.prev {
+    left: 10px;
+}
+
+.nav-btn.next {
+    right: 10px;
+}
+
+/* Footer & Controls */
+.gallery-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding-top: 15px;
+}
+
+.controls-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    background: white;
+    border-radius: 50px;
+    height: 60px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    margin: 0 auto;
+    width: 100%;
+    max-width: 600px;
+}
+
+.control-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #8899a6;
+    padding: 10px;
+    transition: color 0.3s ease;
+}
+
+.control-btn:hover,
+.control-btn.active {
+    color: var(--primary-color);
+}
+
+#btn-favorite.active i {
+    font-weight: 900;
+    color: #ff4757;
+    animation: pulse 0.4s ease;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.3);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.counter {
+    font-family: var(--font-ui);
+    font-weight: 500;
+    font-size: 1rem;
+    color: var(--text-main);
+    letter-spacing: 2px;
+}
+
+/* Thumbnails */
+.thumbnails-track {
+    width: 100%;
+    overflow-x: auto;
+    padding: 10px 0;
+    /* Hide scrollbar */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.thumbnails-track::-webkit-scrollbar {
+    display: none;
+}
+
+.thumbnails-list {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    min-width: min-content;
+    padding: 0 20px;
+}
+
+.thumb {
+    width: 80px;
+    height: 60px;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.thumb:hover {
+    opacity: 0.8;
+    transform: translateY(-3px);
+}
+
+.thumb.active {
+    opacity: 1;
+    border-color: var(--primary-color);
+    box-shadow: 0 5px 15px rgba(225, 173, 172, 0.4);
+    transform: scale(1.1);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .main-viewer {
+        padding: 0;
+    }
+
+    .photo-wrapper {
+        max-width: 100%;
+        max-height: 60vh;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    #current-photo {
+        border-radius: 0;
+        object-fit: cover;
+    }
+
+    .nav-btn {
+        display: none;
+        /* Swipe on mobile */
+    }
+
+    .caption-container {
+        padding: 15px;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+    }
+
+    .caption-text {
+        font-size: 1.5rem;
+    }
+
+    .photo-meta {
+        font-size: 0.8rem;
+    }
+
+    .controls-bar {
+        border-radius: 20px;
+        margin: 0 10px;
+        width: auto;
+    }
+
+    .thumbnails-list {
+        justify-content: flex-start;
+    }
+}
