@@ -7,27 +7,31 @@ const albumData = [
         legenda: "Onde tudo começou... cada pôr do sol me lembra você ❤️",
         data: "14/02/2023",
         local: "Praia dos Sonhos",
-        mensagem: "Lembro desse dia como se fosse hoje. O céu estava pintado de cores que só a natureza consegue criar, mas a vista mais linda era você ao meu lado."
+        mensagem: "Lembro desse dia como se fosse hoje. O céu estava pintado de cores que só a natureza consegue criar, mas a vista mais linda era você ao meu lado.",
+        musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" // Música romântica 1
     },
     {
         src: "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=1000&auto=format&fit=crop",
         legenda: "Seu sorriso ilumina até os meus dias mais cinzas ✨",
         data: "20/03/2023",
         local: "Nosso Parque",
-        mensagem: "Seu sorriso tem esse poder incrível de mudar meu humor instantaneamente. Obrigado por ser minha luz."
+        mensagem: "Seu sorriso tem esse poder incrível de mudar meu humor instantaneamente. Obrigado por ser minha luz.",
+        musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" // Música alegre 2
     },
     {
         src: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=1000&auto=format&fit=crop",
         legenda: "Ainda sinto o gosto desse dia perfeito 🥂",
         data: "12/06/2023",
         local: "Jantar Romântico",
-        mensagem: "Nossas conversas, os risos, o brinde... Cada detalhe desse jantar ficou gravado no meu coração."
+        mensagem: "Nossas conversas, os risos, o brinde... Cada detalhe desse jantar ficou gravado no meu coração.",
+        musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" // Música jantar 3
     },
 ];
 
 // --- VARIÁVEIS GLOBAIS ---
 let currentIndex = 0;
 let isPlaying = false;
+let isMusicPlaying = false; // Estado para controlar se a música deve tocar
 let slideInterval;
 let favorites = JSON.parse(localStorage.getItem('albumFavorites')) || [];
 
@@ -65,6 +69,12 @@ const btnDownload = document.getElementById('btn-download');
 function init() {
     totalPhotosSpan.textContent = albumData.length;
     renderThumbnails();
+
+    // Configura a música inicial sem tocar
+    if (bgMusic && albumData[currentIndex].musica) {
+        bgMusic.src = albumData[currentIndex].musica;
+    }
+
     loadPhoto(currentIndex);
     checkFavoriteStatus();
 
@@ -75,23 +85,23 @@ function init() {
 
 function setupEventListeners() {
     // Welcome Screen
-    btnEnter.addEventListener('click', enterAlbum);
+    if (btnEnter) btnEnter.addEventListener('click', enterAlbum);
 
     // Navegação
-    btnPrev.addEventListener('click', () => changePhoto(-1));
-    btnNext.addEventListener('click', () => changePhoto(1));
+    if (btnPrev) btnPrev.addEventListener('click', () => changePhoto(-1));
+    if (btnNext) btnNext.addEventListener('click', () => changePhoto(1));
 
     // Controles
-    btnPlay.addEventListener('click', togglePlay);
-    btnFavorite.addEventListener('click', handleFavoriteClick);
-    btnFullscreen.addEventListener('click', toggleFullscreen);
-    btnDownload.addEventListener('click', downloadPhoto);
+    if (btnPlay) btnPlay.addEventListener('click', togglePlay);
+    if (btnFavorite) btnFavorite.addEventListener('click', handleFavoriteClick);
+    if (btnFullscreen) btnFullscreen.addEventListener('click', toggleFullscreen);
+    if (btnDownload) btnDownload.addEventListener('click', downloadPhoto);
     if (btnMusic) btnMusic.addEventListener('click', toggleMusic);
 
     // Carta
-    btnOpenLetter.addEventListener('click', openLetter);
-    letterOverlay.addEventListener('click', closeLetter);
-    flipCard.addEventListener('click', () => flipCard.classList.toggle('flipped'));
+    if (btnOpenLetter) btnOpenLetter.addEventListener('click', openLetter);
+    if (letterOverlay) letterOverlay.addEventListener('click', closeLetter);
+    if (flipCard) flipCard.addEventListener('click', () => flipCard.classList.toggle('flipped'));
 
     // Teclado
     document.addEventListener('keydown', (e) => {
@@ -104,7 +114,7 @@ function setupEventListeners() {
 
 function enterAlbum() {
     welcomeScreen.classList.add('hidden');
-    startMusic();
+    // Não força play aqui, deixa o usuário controlar pelo botão de música
 }
 
 // --- LÓGICA DE FOTOS ---
@@ -120,10 +130,25 @@ function loadPhoto(index) {
 
         if (dateText) dateText.textContent = photo.data || '';
         if (locationText) locationText.textContent = photo.local || '';
-
         if (letterText) letterText.textContent = photo.mensagem || "Escreva uma mensagem especial...";
+        if (currentIndexSpan) currentIndexSpan.textContent = index + 1;
 
-        currentIndexSpan.textContent = index + 1;
+        // --- MÚSICA POR FOTO ---
+        // Se a música estiver ativada (isMusicPlaying), troca e toca a nova música
+        if (bgMusic && photo.musica) {
+            // Se o link mudou, atualiza
+            // Usamos encodedURI ou string comparison simples
+            const currentSrc = bgMusic.src;
+            const newSrc = photo.musica;
+
+            // Verifica se a src é diferente (navegadores podem expandir url relativa/absoluta)
+            if (!currentSrc.includes(newSrc)) {
+                bgMusic.src = newSrc;
+                if (isMusicPlaying) {
+                    bgMusic.play().catch(e => console.log("Erro ao trocar música:", e));
+                }
+            }
+        }
 
         // Atualiza Thumbnails
         document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
@@ -168,22 +193,28 @@ function renderThumbnails() {
 }
 
 // --- MÚSICA ---
-function startMusic() {
-    bgMusic.volume = 0.4;
-    bgMusic.play().then(() => {
-        btnMusic.classList.add('active');
-    }).catch(e => {
-        console.warn("Autoplay bloqueado:", e);
-    });
-}
-
 function toggleMusic() {
+    if (!bgMusic) return;
+
     if (bgMusic.paused) {
-        bgMusic.play();
-        btnMusic.classList.add('active');
+        // Tentar tocar
+        const playPromise = bgMusic.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                isMusicPlaying = true;
+                btnMusic.classList.add('active');
+                // Opcional: mudar ícone
+                // btnMusic.querySelector('i').className = 'fas fa-music';
+            }).catch(error => {
+                console.log("Autoplay barrado ou erro:", error);
+            });
+        }
     } else {
         bgMusic.pause();
+        isMusicPlaying = false;
         btnMusic.classList.remove('active');
+        // Opcional: mudar ícone
+        // btnMusic.querySelector('i').className = 'fas fa-volume-mute';
     }
 }
 
@@ -300,6 +331,9 @@ function setupSwipe() {
     let touchStartX = 0;
     let touchEndX = 0;
     const viewer = document.querySelector('.main-viewer');
+
+    // Check if viewer exists to prevent errors on some layouts
+    if (!viewer) return;
 
     viewer.addEventListener('touchstart', (e) => touchStartX = e.changedTouches[0].screenX);
     viewer.addEventListener('touchend', (e) => {
