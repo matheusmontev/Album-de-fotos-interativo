@@ -3,15 +3,15 @@
  */
 const albumData = [
     {
-        src: "https://images.unsplash.com/photo-1518568814500-bf0f8d125f46?q=80&w=1000&auto=format&fit=crop",
-        legenda: "Onde tudo começou... cada pôr do sol me lembra você ❤️",
-        data: "14/02/2023",
-        local: "Praia dos Sonhos",
+        src: "imagem/IMG_20250426_231247_918.jpg",
+        legenda: "Onde tudo começou... ❤️",
+        data: "26/abril/2025",
+        local: "nossa primeira vez",
         mensagem: "Lembro desse dia como se fosse hoje. O céu estava pintado de cores que só a natureza consegue criar, mas a vista mais linda era você ao meu lado.",
         musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" // Música romântica 1
     },
     {
-        src: "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=1000&auto=format&fit=crop",
+        src: "imagem/PXL_20260101_001938265.jpg",
         legenda: "Seu sorriso ilumina até os meus dias mais cinzas ✨",
         data: "20/03/2023",
         local: "Nosso Parque",
@@ -19,7 +19,7 @@ const albumData = [
         musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" // Música alegre 2
     },
     {
-        src: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=1000&auto=format&fit=crop",
+        src: "imagem/VID_20251004_161612_435.jpg",
         legenda: "Ainda sinto o gosto desse dia perfeito 🥂",
         data: "12/06/2023",
         local: "Jantar Romântico",
@@ -123,6 +123,21 @@ function loadPhoto(index) {
 
     setTimeout(() => {
         const photo = albumData[index];
+
+        // Define o que acontece quando a imagem carrega
+        currentPhoto.onload = () => {
+            currentPhoto.classList.remove('fade-out');
+            photoCaption.style.opacity = 1;
+            photoCaption.style.transition = 'opacity 1s ease';
+        };
+
+        // Fallback em caso de erro no carregamento da imagem
+        currentPhoto.onerror = () => {
+            currentPhoto.classList.remove('fade-out');
+            photoCaption.style.opacity = 1;
+            console.error("Erro ao carregar imagem:", photo.src);
+        };
+
         currentPhoto.src = photo.src;
 
         photoCaption.style.opacity = 0;
@@ -134,14 +149,9 @@ function loadPhoto(index) {
         if (currentIndexSpan) currentIndexSpan.textContent = index + 1;
 
         // --- MÚSICA POR FOTO ---
-        // Se a música estiver ativada (isMusicPlaying), troca e toca a nova música
         if (bgMusic && photo.musica) {
-            // Se o link mudou, atualiza
-            // Usamos encodedURI ou string comparison simples
             const currentSrc = bgMusic.src;
             const newSrc = photo.musica;
-
-            // Verifica se a src é diferente (navegadores podem expandir url relativa/absoluta)
             if (!currentSrc.includes(newSrc)) {
                 bgMusic.src = newSrc;
                 if (isMusicPlaying) {
@@ -159,12 +169,6 @@ function loadPhoto(index) {
         }
 
         checkFavoriteStatus();
-
-        currentPhoto.onload = () => {
-            currentPhoto.classList.remove('fade-out');
-            photoCaption.style.opacity = 1;
-            photoCaption.style.transition = 'opacity 1s ease';
-        };
     }, 300);
 }
 
