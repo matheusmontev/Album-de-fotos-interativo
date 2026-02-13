@@ -16,7 +16,7 @@ const albumData = [
         data: "23/Agosto/2025",
         local: "Tarde Especial",
         mensagem: "Existem momentos que a gente guarda no coração como se fossem tesouros. Esse dia foi um deles, onde cada risada sua me fazia ter certeza do quanto te amo.",
-        musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+        musica: "https://youtu.be/NgSbod_E3Hs?list=RDNgSbod_E3Hs&t=10"
     },
     {
         src: "imagem/IMG-20250824-WA0034.jpg",
@@ -24,7 +24,7 @@ const albumData = [
         data: "24/Agosto/2025",
         local: "Momentos Nossos",
         mensagem: "Amo a forma como a gente se entende, como a gente se completa. Cada detalhe seu é uma poesia que eu nunca canso de ler.",
-        musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"
+        musica: "https://youtu.be/lV2plyhSRBU?list=RDlV2plyhSRBU&t=23"
     },
     {
         src: "imagem/VID_20251004_161612_435.jpg",
@@ -32,7 +32,7 @@ const albumData = [
         data: "04/Outubro/2025",
         local: "Jantar Romântico",
         mensagem: "Nossas conversas, os risos, Cada detalhe desse jantar ficou gravado não e todo dia que conheco me sogro e que ele me recebe tao bem",
-        musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
+        musica: "https://youtu.be/mBvcHrwuAjs?list=RDmBvcHrwuAjs&t=31"
     },
     {
         src: "imagem/PXL_20251231_232447186.jpg",
@@ -40,7 +40,7 @@ const albumData = [
         data: "31/Dezembro/2025",
         local: "Véspera de Ano Novo",
         mensagem: "Enquanto o mundo esperava pela virada, meu único desejo era que o tempo parasse ali, com você, pra sempre.",
-        musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3"
+        musica: "https://youtu.be/_v0-5QY6y-M?list=RD_v0-5QY6y-M&t=45"
     },
     {
         src: "imagem/PXL_20260101_001938265.jpg",
@@ -48,7 +48,7 @@ const albumData = [
         data: "01/Janeiro/2026",
         local: "Início de um novo ciclo",
         mensagem: "Seu sorriso ilumina até os meus dias mais cinzas. Começar o ano com você é a maior benção que eu poderia pedir feliz 5 meses de namoro meu amor, te amo muito de uma forma que nem sei explicar, palavras se tornan pequenas pra descrever o tamanho do meu amor por você",
-        musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+        musica: "https://youtu.be/V141wUSkTfk?list=RDV141wUSkTfk&t=10"
     },
 ];
 
