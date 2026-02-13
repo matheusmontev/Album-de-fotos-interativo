@@ -8,7 +8,7 @@ const albumData = [
         data: "26/Abril/2025",
         local: "Nosso Primeiro Encontro",
         mensagem: "lembro como hoje, o nervosismo que eu estava, o medo de não da certo, mas quando estava com você me sentir completo, e hoje vejo que você é a mulher da minha vida, te amo",
-        musica: "https://open.spotify.com/intl-pt/track/5gkGWyvNHFpXYCWDz7I1Xp?si=606e60ab63444c0d"
+        musica: "https://youtu.be/aVL_fLsXTuM?list=RDaVL_fLsXTuM&t=22"
     },
     {
         src: "imagem/IMG_20250823_140717_683.jpg",
@@ -136,9 +136,16 @@ function setupEventListeners() {
     });
 }
 
-function enterAlbum() {
+async function enterAlbum() {
     welcomeScreen.classList.add('hidden');
-    // Não força play aqui, deixa o usuário controlar pelo botão de música
+
+    // Pequeno delay para garantir que a interação do usuário seja registrada
+    setTimeout(() => {
+        // Tenta iniciar a música da primeira foto
+        if (albumData[currentIndex].musica) {
+            updateMusicPlayer(albumData[currentIndex].musica);
+        }
+    }, 100);
 }
 
 // --- LÓGICA DE FOTOS ---
@@ -233,9 +240,18 @@ function updateMusicPlayer(url) {
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
         // YouTube
         const videoId = getYouTubeID(url);
+        const startTime = getYouTubeStartTime(url);
+
         if (videoId && container) {
             const iframe = document.createElement('iframe');
-            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&modestbranding=1`;
+
+            // Build Src with parameters
+            let src = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&modestbranding=1`;
+            if (startTime) {
+                src += `&start=${startTime}`;
+            }
+
+            iframe.src = src;
             iframe.allow = "autoplay; encrypted-media";
             iframe.style.width = "1px";
             iframe.style.height = "1px";
@@ -285,6 +301,16 @@ function getYouTubeID(url) {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
     return (match && match[2].length === 11) ? match[2] : null;
+}
+
+function getYouTubeStartTime(url) {
+    try {
+        const urlObj = new URL(url);
+        const params = new URLSearchParams(urlObj.search);
+        return params.get('t') || params.get('start') || null;
+    } catch (e) {
+        return null;
+    }
 }
 
 function getSpotifyID(url) {
