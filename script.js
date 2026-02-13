@@ -75,7 +75,7 @@ const letterModal = document.getElementById('letter-modal');
 const letterOverlay = document.getElementById('letter-overlay');
 const btnOpenLetter = document.getElementById('btn-open-letter');
 const letterText = document.getElementById('letter-text');
-const flipCard = document.querySelector('.flip-card');
+// Removed flipCard variable
 
 // Player de Música
 const bgMusic = document.getElementById('bg-music');
@@ -125,7 +125,7 @@ function setupEventListeners() {
     // Carta
     if (btnOpenLetter) btnOpenLetter.addEventListener('click', openLetter);
     if (letterOverlay) letterOverlay.addEventListener('click', closeLetter);
-    if (flipCard) flipCard.addEventListener('click', () => flipCard.classList.toggle('flipped'));
+    // Removed flip card click listener
 
     // Teclado
     document.addEventListener('keydown', (e) => {
@@ -172,16 +172,9 @@ function loadPhoto(index) {
         if (letterText) letterText.textContent = photo.mensagem || "Escreva uma mensagem especial...";
         if (currentIndexSpan) currentIndexSpan.textContent = index + 1;
 
-        // --- MÚSICA POR FOTO ---
-        if (bgMusic && photo.musica) {
-            const currentSrc = bgMusic.src;
-            const newSrc = photo.musica;
-            if (!currentSrc.includes(newSrc)) {
-                bgMusic.src = newSrc;
-                if (isMusicPlaying) {
-                    bgMusic.play().catch(e => console.log("Erro ao trocar música:", e));
-                }
-            }
+        // --- MÚSICA POR FOTO (Híbrido) ---
+        if (photo.musica) {
+            updateMusicPlayer(photo.musica);
         }
 
         // Atualiza Thumbnails
@@ -221,28 +214,99 @@ function renderThumbnails() {
 }
 
 // --- MÚSICA ---
-function toggleMusic() {
-    if (!bgMusic) return;
+// --- MÚSICA HÍBRIDA (YouTube, Spotify, MP3) ---
+function updateMusicPlayer(url) {
+    const container = document.getElementById('music-player-container');
+    const audioPlayer = document.getElementById('bg-music');
 
-    if (bgMusic.paused) {
-        // Tentar tocar
-        const playPromise = bgMusic.play();
-        if (playPromise !== undefined) {
-            playPromise.then(() => {
-                isMusicPlaying = true;
-                btnMusic.classList.add('active');
-                // Opcional: mudar ícone
-                // btnMusic.querySelector('i').className = 'fas fa-music';
-            }).catch(error => {
-                console.log("Autoplay barrado ou erro:", error);
-            });
+    // Pausa player nativo
+    if (audioPlayer) {
+        audioPlayer.pause();
+        audioPlayer.currentTime = 0;
+    }
+
+    // Limpa container de embeds
+    if (container) container.innerHTML = '';
+
+    if (!url) return;
+
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        // YouTube
+        const videoId = getYouTubeID(url);
+        if (videoId && container) {
+            const iframe = document.createElement('iframe');
+            iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&modestbranding=1`;
+            iframe.allow = "autoplay; encrypted-media";
+            iframe.style.width = "1px";
+            iframe.style.height = "1px";
+            container.appendChild(iframe);
+            isMusicPlaying = true;
+        }
+    } else if (url.includes('spotify.com')) {
+        // Spotify
+        const spotifyId = getSpotifyID(url);
+        if (spotifyId && container) {
+            const iframe = document.createElement('iframe');
+            // Nota: Spotify só permite autoplay de 30s se não logado
+            iframe.src = `https://open.spotify.com/embed/track/${spotifyId}?utm_source=generator&theme=0`;
+            iframe.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+            iframe.style.width = "300px"; // Spotify precisa de tamanho minimo pra aparecer o controle
+            iframe.style.height = "80px";
+            iframe.style.borderRadius = "12px";
+
+            // Torna o container visível momentaneamente para o Spotify
+            const musicContainer = document.getElementById('music-player-container');
+            if (musicContainer) {
+                musicContainer.style.bottom = "20px";
+                musicContainer.style.left = "20px";
+                musicContainer.style.width = "auto";
+                musicContainer.style.height = "auto";
+                musicContainer.style.opacity = "0.9";
+                musicContainer.style.pointerEvents = "auto";
+                musicContainer.style.zIndex = "100";
+            }
+
+            container.appendChild(iframe);
+            isMusicPlaying = true;
         }
     } else {
-        bgMusic.pause();
+        // MP3 Nativo
+        if (audioPlayer) {
+            audioPlayer.src = url;
+            audioPlayer.play().catch(e => console.log("Erro autoplay MP3:", e));
+            isMusicPlaying = true;
+        }
+    }
+
+    if (btnMusic) btnMusic.classList.add('active');
+}
+
+function getYouTubeID(url) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+}
+
+function getSpotifyID(url) {
+    // Ex: https://open.spotify.com/track/4cOdK2wGLETKBW3PvgPWqT
+    const parts = url.split('/');
+    return parts[parts.length - 1].split('?')[0];
+}
+
+function toggleMusic() {
+    // Lógica simplificada: apenas muta/desmuta visuals ou para players
+    const container = document.getElementById('music-player-container');
+    const audioPlayer = document.getElementById('bg-music');
+
+    if (isMusicPlaying) {
+        // Parar tudo
+        if (container) container.innerHTML = '';
+        if (audioPlayer) audioPlayer.pause();
         isMusicPlaying = false;
-        btnMusic.classList.remove('active');
-        // Opcional: mudar ícone
-        // btnMusic.querySelector('i').className = 'fas fa-volume-mute';
+        if (btnMusic) btnMusic.classList.remove('active');
+    } else {
+        // Retomar (recarrega a música da foto atual)
+        updateMusicPlayer(albumData[currentIndex].musica);
     }
 }
 
@@ -346,24 +410,19 @@ function downloadPhoto() {
 }
 
 function openLetter() {
-    // Garante que o texto está atualizado antes de mostrar
+    // Atualiza o texto antes de mostrar o modal
     if (letterText && albumData[currentIndex]) {
-        letterText.textContent = albumData[currentIndex].mensagem || "Escreva uma mensagem especial...";
+        // Usa innerHTML para permitir quebras de linha se houver
+        letterText.innerHTML = albumData[currentIndex].mensagem || "Escreva uma mensagem especial...";
     }
 
-    letterModal.classList.remove('hidden');
-
-    // Pequeno delay para uma transação suave e então vira a carta automaticamente
-    setTimeout(() => {
-        if (flipCard && !flipCard.classList.contains('flipped')) {
-            flipCard.classList.add('flipped');
-        }
-    }, 500);
+    if (letterModal) {
+        letterModal.classList.remove('hidden');
+    }
 }
 
 function closeLetter() {
     letterModal.classList.add('hidden');
-    setTimeout(() => flipCard.classList.remove('flipped'), 300);
 }
 
 // --- MOBILE SWIPE ---
