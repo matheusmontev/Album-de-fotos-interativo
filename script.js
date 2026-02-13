@@ -5,26 +5,50 @@ const albumData = [
     {
         src: "imagem/IMG_20250426_231247_918.jpg",
         legenda: "Onde tudo começou... ❤️",
-        data: "26/abril/2025",
-        local: "nossa primeira vez",
-        mensagem: "Lembro desse dia como se fosse hoje. O céu estava pintado de cores que só a natureza consegue criar, mas a vista mais linda era você ao meu lado.",
-        musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" // Música romântica 1
+        data: "26/Abril/2025",
+        local: "Nosso Primeiro Encontro",
+        mensagem: "lembro como hoje, o nervosismo que eu estava, o medo de não da certo, mas quando estava com você me sentir completo, e hoje vejo que você é a mulher da minha vida, te amo",
+        musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
     },
     {
-        src: "imagem/PXL_20260101_001938265.jpg",
-        legenda: "Seu sorriso ilumina até os meus dias mais cinzas ✨",
-        data: "20/03/2023",
-        local: "Nosso Parque",
-        mensagem: "Seu sorriso tem esse poder incrível de mudar meu humor instantaneamente. Obrigado por ser minha luz.",
-        musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" // Música alegre 2
+        src: "imagem/IMG_20250823_140717_683.jpg",
+        legenda: "Seu sorriso é meu  refúgio ✨",
+        data: "23/Agosto/2025",
+        local: "Tarde Especial",
+        mensagem: "Existem momentos que a gente guarda no coração como se fossem tesouros. Esse dia foi um deles, onde cada risada sua me fazia ter certeza do quanto te amo.",
+        musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+    },
+    {
+        src: "imagem/IMG-20250824-WA0034.jpg",
+        legenda: "Cumplicidade em cada detalhe 🌹",
+        data: "24/Agosto/2025",
+        local: "Momentos Nossos",
+        mensagem: "Amo a forma como a gente se entende, como a gente se completa. Cada detalhe seu é uma poesia que eu nunca canso de ler.",
+        musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"
     },
     {
         src: "imagem/VID_20251004_161612_435.jpg",
         legenda: "Ainda sinto o gosto desse dia perfeito 🥂",
-        data: "12/06/2023",
+        data: "04/Outubro/2025",
         local: "Jantar Romântico",
-        mensagem: "Nossas conversas, os risos, o brinde... Cada detalhe desse jantar ficou gravado no meu coração.",
-        musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" // Música jantar 3
+        mensagem: "Nossas conversas, os risos, Cada detalhe desse jantar ficou gravado não e todo dia que conheco me sogro e que ele me recebe tao bem",
+        musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
+    },
+    {
+        src: "imagem/PXL_20251231_232447186.jpg",
+        legenda: "O primeiro de muitos anos ao seu lado ✨",
+        data: "31/Dezembro/2025",
+        local: "Véspera de Ano Novo",
+        mensagem: "Enquanto o mundo esperava pela virada, meu único desejo era que o tempo parasse ali, com você, pra sempre.",
+        musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3"
+    },
+    {
+        src: "imagem/PXL_20260101_001938265.jpg",
+        legenda: "🎆",
+        data: "01/Janeiro/2026",
+        local: "Início de um novo ciclo",
+        mensagem: "Seu sorriso ilumina até os meus dias mais cinzas. Começar o ano com você é a maior benção que eu poderia pedir feliz 5 meses de namoro meu amor, te amo muito de uma forma que nem sei explicar, palavras se tornan pequenas pra descrever o tamanho do meu amor por você",
+        musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
     },
 ];
 
@@ -174,7 +198,7 @@ function loadPhoto(index) {
 
 function changePhoto(direction) {
     currentIndex = (currentIndex + direction + albumData.length) % albumData.length;
-    flipCard.classList.remove('flipped');
+    closeLetter(); // Fecha a carta ao mudar de foto para focar na nova imagem
     loadPhoto(currentIndex);
 }
 
@@ -322,7 +346,19 @@ function downloadPhoto() {
 }
 
 function openLetter() {
+    // Garante que o texto está atualizado antes de mostrar
+    if (letterText && albumData[currentIndex]) {
+        letterText.textContent = albumData[currentIndex].mensagem || "Escreva uma mensagem especial...";
+    }
+
     letterModal.classList.remove('hidden');
+
+    // Pequeno delay para uma transação suave e então vira a carta automaticamente
+    setTimeout(() => {
+        if (flipCard && !flipCard.classList.contains('flipped')) {
+            flipCard.classList.add('flipped');
+        }
+    }, 500);
 }
 
 function closeLetter() {
