@@ -222,55 +222,108 @@ function renderThumbnails() {
 
 // --- MÚSICA ---
 // --- MÚSICA HÍBRIDA (YouTube, Spotify, MP3) ---
+// Global YouTube Player references
+let youtubePlayer = null;
+let isYouTubeReady = false;
+
+// Initialize YouTube API
+function loadYouTubeAPI() {
+    if (!window.YT) {
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    }
+}
+
+// Global API Callback
+window.onYouTubeIframeAPIReady = function () {
+    isYouTubeReady = true;
+};
+
 function updateMusicPlayer(url) {
     const container = document.getElementById('music-player-container');
     const audioPlayer = document.getElementById('bg-music');
 
-    // Pausa player nativo
+    // Pausa áudio nativo sempre
     if (audioPlayer) {
         audioPlayer.pause();
         audioPlayer.currentTime = 0;
     }
 
-    // Limpa container de embeds
-    if (container) container.innerHTML = '';
-
-    if (!url) return;
+    if (!url) {
+        if (youtubePlayer && youtubePlayer.stopVideo) youtubePlayer.stopVideo();
+        if (container) container.innerHTML = '';
+        return;
+    }
 
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
-        // YouTube
+        // YouTube Optimization
         const videoId = getYouTubeID(url);
         const startTime = getYouTubeStartTime(url);
 
-        if (videoId && container) {
-            const iframe = document.createElement('iframe');
+        // Ensure API is loaded
+        if (!window.YT) loadYouTubeAPI();
 
-            // Build Src with parameters
-            let src = `https://www.youtube.com/embed/${videoId}?autoplay=1&loop=1&playlist=${videoId}&controls=0&showinfo=0&modestbranding=1`;
-            if (startTime) {
-                src += `&start=${startTime}`;
+        // Check if we already have a player instance
+        if (youtubePlayer && typeof youtubePlayer.loadVideoById === 'function') {
+            // Player exists, just load new video (FAST)
+            youtubePlayer.loadVideoById({
+                videoId: videoId,
+                startSeconds: startTime ? parseInt(startTime) : 0
+            });
+            // Ensure visible if it was hidden
+            const ytFrame = youtubePlayer.getIframe();
+            if (ytFrame) ytFrame.style.display = 'block';
+
+            // Remove any other iframes from container (e.g. Spotify) but keep YT
+            Array.from(container.children).forEach(child => {
+                if (child !== ytFrame) container.removeChild(child);
+            });
+
+        } else {
+            // First time creation or API not ready yet.
+            // Clear container for fresh start
+            if (container) {
+                // Remove non-YT children
+                container.innerHTML = '';
+
+                // Create placeholder div for YT API to replace
+                const ytDiv = document.createElement('div');
+                ytDiv.id = 'youtube-player-placeholder';
+                container.appendChild(ytDiv);
+
+                // Create Player
+                window.YT ? createYTPlayer(videoId, startTime) : setTimeout(() => createYTPlayer(videoId, startTime), 500);
             }
-
-            iframe.src = src;
-            iframe.allow = "autoplay; encrypted-media";
-            iframe.style.width = "1px";
-            iframe.style.height = "1px";
-            container.appendChild(iframe);
-            isMusicPlaying = true;
         }
+        isMusicPlaying = true;
+
     } else if (url.includes('spotify.com')) {
-        // Spotify
+        // Spotify Logic
+        // Hide YouTube player if it exists (don't destroy to keep state/speed)
+        if (youtubePlayer && youtubePlayer.stopVideo) {
+            youtubePlayer.stopVideo();
+            const ytFrame = youtubePlayer.getIframe();
+            if (ytFrame) ytFrame.style.display = 'none';
+        }
+
+        // Remove any existing Spotify iframes to avoid duplicates
+        const existingSpotify = container.querySelector('iframe[src*="spotify"]');
+        if (existingSpotify) container.removeChild(existingSpotify);
+
         const spotifyId = getSpotifyID(url);
         if (spotifyId && container) {
             const iframe = document.createElement('iframe');
-            // Nota: Spotify só permite autoplay de 30s se não logado
             iframe.src = `https://open.spotify.com/embed/track/${spotifyId}?utm_source=generator&theme=0`;
             iframe.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
-            iframe.style.width = "300px"; // Spotify precisa de tamanho minimo pra aparecer o controle
+            iframe.style.width = "300px";
             iframe.style.height = "80px";
             iframe.style.borderRadius = "12px";
+            iframe.style.position = "relative"; // Ensure stacking context
+            iframe.style.zIndex = "20";
 
-            // Torna o container visível momentaneamente para o Spotify
+            // Spotify Container styling
             const musicContainer = document.getElementById('music-player-container');
             if (musicContainer) {
                 musicContainer.style.bottom = "20px";
@@ -281,12 +334,12 @@ function updateMusicPlayer(url) {
                 musicContainer.style.pointerEvents = "auto";
                 musicContainer.style.zIndex = "100";
             }
-
             container.appendChild(iframe);
             isMusicPlaying = true;
         }
     } else {
         // MP3 Nativo
+        if (youtubePlayer && youtubePlayer.stopVideo) youtubePlayer.stopVideo();
         if (audioPlayer) {
             audioPlayer.src = url;
             audioPlayer.play().catch(e => console.log("Erro autoplay MP3:", e));
@@ -295,6 +348,36 @@ function updateMusicPlayer(url) {
     }
 
     if (btnMusic) btnMusic.classList.add('active');
+}
+
+function createYTPlayer(videoId, startTime) {
+    if (!window.YT) {
+        setTimeout(() => createYTPlayer(videoId, startTime), 500);
+        return;
+    }
+    youtubePlayer = new YT.Player('youtube-player-placeholder', {
+        height: '1',
+        width: '1',
+        videoId: videoId,
+        playerVars: {
+            'autoplay': 1,
+            'controls': 0,
+            'loop': 1,
+            'playlist': videoId,
+            'start': startTime ? parseInt(startTime) : 0
+        },
+        events: {
+            'onReady': (event) => { event.target.playVideo(); },
+            'onStateChange': onPlayerStateChange
+        }
+    });
+}
+
+function onPlayerStateChange(event) {
+    // Optional: Handle loop or end events manually if needed
+    if (event.data === YT.PlayerState.ENDED) {
+        youtubePlayer.playVideo();
+    }
 }
 
 function getYouTubeID(url) {
