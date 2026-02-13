@@ -8,7 +8,7 @@ const albumData = [
         data: "26/Abril/2025",
         local: "Nosso Primeiro Encontro",
         mensagem: "lembro como hoje, o nervosismo que eu estava, o medo de não da certo, mas quando estava com você me sentir completo, e hoje vejo que você é a mulher da minha vida, te amo",
-        musica: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+        musica: "https://open.spotify.com/intl-pt/track/5gkGWyvNHFpXYCWDz7I1Xp?si=606e60ab63444c0d"
     },
     {
         src: "imagem/IMG_20250823_140717_683.jpg",
